@@ -1,4 +1,5 @@
 var trans_arr = new Array();
+var arr_output;
 function vec2( x , y )
 {
 	this.x = x;
@@ -17,6 +18,7 @@ function init()
 {
 	//window.setInterval( draw , 16 );
 	//alert( translate( "produced" , "auto" , "ru" ) );
+    arr_output = $( "#array" );
 	printTranslate( document.getElementById( "text" ).textContent );
 }
 function translate( text , sourceLang , targetLang )
@@ -32,11 +34,20 @@ function translate( text , sourceLang , targetLang )
     .replace( new RegExp( '\\[' , "g" ) , "" )
     .replace( new RegExp( '"' , "g" ) , "" )
     .split( "," );
-    //for( var i = 0; i < word_arr.length; i++ )
-      //  word_arr[i].replace( new RegExp( '"' , "g" ) , "" );
-    return word_arr;
+    var new_arr = new Array();
+    var start = "А".charCodeAt( 0 );
+    var end = "я".charCodeAt( 0 );
+    for( var i = 0; i < word_arr.length; i++ )
+    {
+        var ch = word_arr[i].charCodeAt( 0 );
+        if( ch > start && ch < end && word_arr[i] != "" )
+        {
+            new_arr[new_arr.length] = word_arr[i];
+        }
+    }
+    return new_arr;
 }
-function printTranslatedTextAsync( text , id , w , i )
+function printTranslatedTextAsync( text , id , w , i , pid )
 {
 	function afunc()
 	{
@@ -47,6 +58,14 @@ function printTranslatedTextAsync( text , id , w , i )
         trans_arr[i] = transl;
         var elem = $( "#" + id );
         elem.append( transl[0] );
+        $( "#" + pid ).mouseover(
+            function()
+            {
+                arr_output.empty();
+                for( j in trans_arr[i] )
+                    arr_output.append( "{" + trans_arr[i][j] + "}" );
+            }
+        );
         var lof = elem.offset();
         var lw = elem.width();
         elem.offset( { top: lof.top , left: lof.left + w / 2 - lw / 2 } );
@@ -65,26 +84,25 @@ function printTranslate( text )
     {
         if( lines[i] == "" ) continue;
         var words = lines[i].split( " " );
-        var pos = 0;
-        var ypos = i * space;
         for( var j = 0; j < words.length; j++ )
         {
             if( words[j] == "" ) continue;
             var id = "word" + i + "" + j;
             output.append( "<div class='word' id='" + id + 
-                          "' style='left:" + pos + "px;" + " top:" + ypos + "px;" + "'>" + words[j] + "</div>" );
+                          //"' style='left:" + pos + "px;" + " top:" + ypos + "px;" + 
+                          "'>" + words[j] + "</div>" );
             var w = $( "#" + id ).width();
-            var lid = "trword" + ( ypos - fsize ) + "" + pos;
+            var pos = $( "#" + id ).offset();
+            var lid = "trword" + indx;
             output.append(
                 "<div class='trword' id='" + lid +
-                "' style='left:" + ( pos ) + "px;" + " top:" + ( ypos - fsize ) + "px;" + "'>" +
+                "' style='left:" + ( pos.left ) + "px;" + " top:" + ( pos.top - fsize ) + "px;" + "'>" +
                 "</div>"
             );
-            printTranslatedTextAsync( words[j] , lid , w , indx );
-            pos += w + size;
+            printTranslatedTextAsync( words[j] , lid , w , indx , id );
             indx++;
         }
-        output.append( "</br>" );
+        output.append( "</br></br>" );
     }
 	/*var lines = text.split( "\n" );
 	canvas.width = 512;
