@@ -23,7 +23,7 @@ function init()
 }
 function translate( text , sourceLang , targetLang )
 {
-	var send = text.replace( new RegExp( '[.," ]' , "g" ) , "" );
+	var send = text.replace( new RegExp( '[.,"]' , "g" ) , "" );
 	//return send;
 	var url = "https://translate.googleapis.com/translate_a/t?client=t&sl=" 
             + sourceLang + "&tl=" + targetLang + "&dt=t&q=" + encodeURI( send );
@@ -72,6 +72,16 @@ function printTranslatedTextAsync( text , id , w , i , pid )
 	}
 	setTimeout( afunc , 0 );
 }
+function printTranslatedLineAsync( text , id )
+{
+	function afunc()
+	{
+        var transl = translate( text , "ge" , "ru" );
+        var elem = $( "#" + id );
+        elem.append( transl[0] );
+	}
+	setTimeout( afunc , 0 );
+}
 function printTranslate( text )
 {
     var lines = text.split( "\n" );
@@ -84,6 +94,7 @@ function printTranslate( text )
     {
         if( lines[i] == "" ) continue;
         var words = lines[i].split( " " );
+        var pos0;
         for( var j = 0; j < words.length; j++ )
         {
             if( words[j] == "" ) continue;
@@ -93,6 +104,8 @@ function printTranslate( text )
                           "'>" + words[j] + "</div>" );
             var w = $( "#" + id ).width();
             var pos = $( "#" + id ).offset();
+            if( j == 0 )
+                pos0 = pos;
             var lid = "trword" + indx;
             output.append(
                 "<div class='trword' id='" + lid +
@@ -102,6 +115,13 @@ function printTranslate( text )
             printTranslatedTextAsync( words[j] , lid , w , indx , id );
             indx++;
         }
+        var did = "trline" + i;
+        output.append(
+                "<div class='trline' id='" + did +
+                "' style='left:" + ( pos0.left ) + "px;" + " top:" + ( pos0.top + 22 ) + "px;" + "'>" +
+                "</div>"
+            );
+        printTranslatedLineAsync( lines[i] , did );
         output.append( "</br></br>" );
     }
 	/*var lines = text.split( "\n" );
